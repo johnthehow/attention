@@ -1,3 +1,4 @@
+# -*-coding:utf-8-*-
 import warnings
 
 warnings.filterwarnings("ignore", category=DeprecationWarning) 
@@ -27,10 +28,10 @@ def main():
 	load_model()
 	load_treebank(corpus_filename,treebank_wd)
 	print("main:>>>> BERT version"+model_version)
-	print("main:>>>> treebank path:"+treebank_wd)
-	print("main:>>>> treebank filename:"+corpus_filename)
-	print("main:>>>> main fn: precession_all()")
-	print("main:>>>> typed dependenies to be processed: "+str(relist))
+	print("main:>>>> Treebank path:"+treebank_wd)
+	print("main:>>>> Treebank filename:"+corpus_filename)
+	print("main:>>>> Main function: precession_all()")
+	print("main:>>>> Typed dependenies to be processed: "+str(relist))
 	print("main:>>>> For sentence-wise analysis，run debugger()")
 	return
 
@@ -39,7 +40,7 @@ def load_config():
 	global model_version,treebank_wd,corpus_filename,relist,attention_matrix_wd,head_prec_wd, wordified_matrix_wd,precession_filename,pickle_matrix_wd, pickle_filename
 	model_version = 'bert-base-uncased'
 	
-	default_treebank_wd = "D:\\thehow\\tasks\\attention_analysis\\treebank\\64_sent\\"
+	default_treebank_wd = "D:\\thehow\\tasks\\attention_analysis\\treebank\\64\\sd_conll\\"
 	print("load_config:>>>> ",end="")
 	print(" current treebank path： ",end="")
 	print(default_treebank_wd)	
@@ -105,7 +106,7 @@ def load_config():
 		print("load_config:>>>> current: ",end="")
 		print(precession_filename)
 
-	default_pickle_matrix_wd = "D:\\thehow\\tasks\\attention_analysis\\output\\pickle_matrix\\"
+	default_pickle_matrix_wd = "D:\\thehow\\tasks\\attention_analysis\\treebank\\64\\paper_pkl\\"
 	print("load_config:>>>> ",end="")
 	print("Pickled Matrix path： ",end="")
 	print(default_pickle_matrix_wd)	
@@ -182,9 +183,9 @@ def one_head_all_sent_one_rel_precession(CORPUS,layer,head,rel):
 		corpus_prec = corpus_sum/corpus_len
 	end = time.clock()
 	duration = end-start
-	# print("one_head_all_sent_one_rel_precession>>>> Duration: "+str(duration))
-	# print("one_head_all_sent_one_rel_precession>>>> Layer: "+str(layer)+" "+"Head: "+str(head)+" "+"Relation: "+rel)
-	# print("one_head_all_sent_one_rel_precession>>>> Precession: "+ str(corpus_prec))
+	print("one_head_all_sent_one_rel_precession>>>> Duration: "+str(duration))
+	print("one_head_all_sent_one_rel_precession>>>> Layer: "+str(layer)+" "+"Head: "+str(head)+" "+"Relation: "+rel)
+	print("one_head_all_sent_one_rel_precession>>>> Precession: "+ str(corpus_prec))
 	return (layer,head,rel,corpus_prec)
 
 
@@ -328,45 +329,45 @@ def one_sent_rel_info(layer,head,sent_id,rel):
 	rel_len_value = len(l_list)
 	return rel_sum_value,rel_len_value
 
-
-def save_one_head_one_sent_wordified_matrix_pkl(layer,head,sent_id,write_to_local):
-	global WORDIFIED_MATRIX
-	pkl_all_head_all_sent_attention_matrix = pickle.load(open(pickle_matrix_wd+pickle_filename,mode='rb'))
-	print("save_one_head_one_sent_wordified_matrix>>>> :"+str(sent_id))
-	WORDIFIED_MATRIX = pkl_all_head_all_sent_attention_matrix[sent_id]['attns'][layer][head]
-	if write_to_local == 1:
-		filename = wordified_matrix_wd + "wordified_bert_matrix"+"layer-"+str(layer)+"_"+"head-"+str(head)+".csv"
-		numpy.savetxt(filename,WORDIFIED_MATRIX,fmt="%10.8f",delimiter=",")
-	return WORDIFIED_MATRIX
+# def save_one_head_one_sent_wordified_matrix(layer,head,sent_id,write_to_local):
+# 	global WORDIFIED_MATRIX
+# 	filename = wordified_matrix_wd + "wordified_bert_matrix"+"layer-"+str(layer)+"_"+"head-"+str(head)+".csv"
+# 	bert_matrix = BERT_ATTENTION_MATRIX
+# 	id_conv_table = preproc_one_sent(sent_id)['id_conv_table']
+# 	id_conv_table_1 = copy.deepcopy(id_conv_table)
+# 	id_conv_table_2 = copy.deepcopy(id_conv_table)
+# 	for i in range(len(id_conv_table_1)-1):
+# 			while id_conv_table_1[i+1] == id_conv_table_1[i]:
+# 				bert_matrix[:,i] = bert_matrix[:,i]+bert_matrix[:,i+1]
+# 				bert_matrix = numpy.delete(bert_matrix,i+1,axis=1)
+# 				del id_conv_table_1[i+1]
+# 			if i == len(id_conv_table_1)-3:
+# 				break
+# 	for j in range(len(id_conv_table_2)-1):
+# 		cnt = 1
+# 		while id_conv_table_2[j+1] == id_conv_table_2[j]:
+# 			cnt += 1
+# 			bert_matrix[j,:] = bert_matrix[j,:]+bert_matrix[j+1,:]
+# 			bert_matrix = numpy.delete(bert_matrix,j+1,axis=0)
+# 			del id_conv_table_2[j+1]
+# 		bert_matrix[j,:] = bert_matrix[j,:]/cnt
+# 		if j == len(id_conv_table_2)-3:
+# 			break
+# 	WORDIFIED_MATRIX = bert_matrix
+# 	if write_to_local == 1:
+# 		numpy.savetxt(filename,bert_matrix,fmt="%10.8f",delimiter=",")
+# 	return WORDIFIED_MATRIX
 
 def save_one_head_one_sent_wordified_matrix(layer,head,sent_id,write_to_local):
 	global WORDIFIED_MATRIX
-	filename = wordified_matrix_wd + "wordified_bert_matrix"+"layer-"+str(layer)+"_"+"head-"+str(head)+".csv"
-	bert_matrix = BERT_ATTENTION_MATRIX
-	id_conv_table = preproc_one_sent(sent_id)['id_conv_table']
-	id_conv_table_1 = copy.deepcopy(id_conv_table)
-	id_conv_table_2 = copy.deepcopy(id_conv_table)
-	for i in range(len(id_conv_table_1)-1):
-			while id_conv_table_1[i+1] == id_conv_table_1[i]:
-				bert_matrix[:,i] = bert_matrix[:,i]+bert_matrix[:,i+1]
-				bert_matrix = numpy.delete(bert_matrix,i+1,axis=1)
-				del id_conv_table_1[i+1]
-			if i == len(id_conv_table_1)-3:
-				break
-	for j in range(len(id_conv_table_2)-1):
-		cnt = 1
-		while id_conv_table_2[j+1] == id_conv_table_2[j]:
-			cnt += 1
-			bert_matrix[j,:] = bert_matrix[j,:]+bert_matrix[j+1,:]
-			bert_matrix = numpy.delete(bert_matrix,j+1,axis=0)
-			del id_conv_table_2[j+1]
-		bert_matrix[j,:] = bert_matrix[j,:]/cnt
-		if j == len(id_conv_table_2)-3:
-			break
-	WORDIFIED_MATRIX = bert_matrix
+	save_filename = wordified_matrix_wd + "wordified_bert_matrix"+"layer-"+str(layer)+"_"+"head-"+str(head)+".csv"
+	pickle_full_filename = pickle_matrix_wd+pickle_filename
+	pkl = open(pickle_full_filename,mode='rb')
+	pkl = pickle.load(pkl,encoding='bytes')
+	WORDIFIED_MATRIX = pkl[sent_id][b'attns'][layer][head]
 	if write_to_local == 1:
-		numpy.savetxt(filename,bert_matrix,fmt="%10.8f",delimiter=",")
-	return WORDIFIED_MATRIX
+		numpy.savetxt(save_filename,WORDIFIED_MATRIX,fmt="%10.8f",delimiter=",")
+	return
 
 def debugger(layer,head,sent_id):
 	global deb_sent_ud,deb_sent_raw,deb_sent_bert,deb_bert_matrix,deb_wordified_matrix
@@ -393,4 +394,4 @@ def debugger(layer,head,sent_id):
 	return
 
 main()
-# precession_all()
+precession_all()
