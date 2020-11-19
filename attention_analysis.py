@@ -147,13 +147,13 @@ def load_treebank(corpus_filename, treebank_wd):
 def preproc_one_sent(sent_id):
 	sent_ud = get_sent_ud(sent_id)
 	sent_raw = get_sent_raw(sent_ud)
-	sent_bert = get_sent_bert(sent_raw)
-	id_conv_table = get_id_conv_table(sent_ud,sent_bert)
+	# sent_bert = get_sent_bert(sent_raw)
+	# id_conv_table = get_id_conv_table(sent_ud,sent_bert)
 	dep_head_table = [(int(token.id),int(token.head)) for token in sent_ud]
-	return {'sent_id':sent_id,'sent_raw':sent_raw,'sent_bert':sent_bert,'sent_ud':sent_ud,'id_conv_table':id_conv_table,'dep_head_table':dep_head_table}
+	return {'sent_id':sent_id,'sent_raw':sent_raw, 'sent_ud':sent_ud, 'dep_head_table':dep_head_table}
 
 def one_head_one_sent_one_rel_precession(layer,head,sent_id,rel):
-	BERT_ATTENTION_MATRIX = save_one_head_one_sent_bert_attention_matrix(layer,head,sent_id,0)
+	# BERT_ATTENTION_MATRIX = save_one_head_one_sent_bert_attention_matrix(layer,head,sent_id,0)
 	WORDIFIED_MATRIX = save_one_head_one_sent_wordified_matrix(layer,head,sent_id,0)
 	rel_info = one_sent_rel_info(layer,head,sent_id,rel)
 	one_sent_rel_value_sum = rel_info[0]
@@ -222,14 +222,14 @@ def get_sent_raw(sent_ud):
 		sent_raw = sent_raw[1:]
 	return sent_raw
 
-def get_sent_bert(sent_raw):
-	inputs = TOKENIZER.encode_plus(sent_raw, return_tensors='pt', add_special_tokens=True)
-	token_type_ids = inputs['token_type_ids']
-	input_ids = inputs['input_ids']
-	input_id_list = input_ids[0].tolist()
-	tokens = TOKENIZER.convert_ids_to_tokens(input_id_list)
-	sent_bert = tokens
-	return sent_bert
+# def get_sent_bert(sent_raw):
+# 	inputs = TOKENIZER.encode_plus(sent_raw, return_tensors='pt', add_special_tokens=True)
+# 	token_type_ids = inputs['token_type_ids']
+# 	input_ids = inputs['input_ids']
+# 	input_id_list = input_ids[0].tolist()
+# 	tokens = TOKENIZER.convert_ids_to_tokens(input_id_list)
+# 	sent_bert = tokens
+# 	return sent_bert
 
 def rel_exist(sent_ud,dep_ordid,head_ordid,rel):
 	ref_pair_list = []
@@ -259,19 +259,19 @@ def get_candidate_head(sent_ud,rel):
 	head_list = list(set(head_list))
 	return head_list
 
-def save_one_head_one_sent_bert_attention_matrix(layer,head,sent_id,write_to_local):
-	global BERT_ATTENTION_MATRIX
-	sent_raw = preproc_one_sent(sent_id)['sent_raw']
-	inputs = TOKENIZER.encode_plus(sent_raw, return_tensors='pt', add_special_tokens=True)
-	token_type_ids = inputs['token_type_ids']
-	input_ids = inputs['input_ids']
-	sent_attention = MODEL(input_ids, token_type_ids=token_type_ids)[-1]
-	BERT_ATTENTION_MATRIX = sent_attention[layer][0][head].detach().numpy()
-	if write_to_local ==1:
-		numpy.set_printoptions(suppress=True,precision=8)
-		filename = attention_matrix_wd + "attention_"+"layer-"+str(layer)+"_"+"head-"+str(head)+".csv"
-		numpy.savetxt(filename,BERT_ATTENTION_MATRIX,fmt="%10.8f",delimiter=",")
-	return BERT_ATTENTION_MATRIX
+# def save_one_head_one_sent_bert_attention_matrix(layer,head,sent_id,write_to_local):
+# 	global BERT_ATTENTION_MATRIX
+# 	sent_raw = preproc_one_sent(sent_id)['sent_raw']
+# 	inputs = TOKENIZER.encode_plus(sent_raw, return_tensors='pt', add_special_tokens=True)
+# 	token_type_ids = inputs['token_type_ids']
+# 	input_ids = inputs['input_ids']
+# 	sent_attention = MODEL(input_ids, token_type_ids=token_type_ids)[-1]
+# 	BERT_ATTENTION_MATRIX = sent_attention[layer][0][head].detach().numpy()
+# 	if write_to_local ==1:
+# 		numpy.set_printoptions(suppress=True,precision=8)
+# 		filename = attention_matrix_wd + "attention_"+"layer-"+str(layer)+"_"+"head-"+str(head)+".csv"
+# 		numpy.savetxt(filename,BERT_ATTENTION_MATRIX,fmt="%10.8f",delimiter=",")
+# 	return BERT_ATTENTION_MATRIX
 
 def most_attend_head(layer,head,sent_id,dep_ordid):
 	sent_attention_wordified_matrix = WORDIFIED_MATRIX
@@ -285,33 +285,33 @@ def most_attend_dep(layer,head,sent_id,head_ordid):
 	most_attend_dep_ordid = numpy.argmax(head_attention_col).item()
 	return most_attend_dep_ordid
 
-def get_id_conv_table(sent_ud,sent_bert):
-	id_conv_table = []
-	sent_ud_list = [s.form for s in sent_ud]
-	sent_bert_trim = sent_bert[1:-1]
-	for i in range(len(sent_ud_list)):
-		if sent_bert_trim[i] == sent_ud_list[i].lower():
-			id_conv_table.append(i+1)
-		elif sent_bert_trim[i] != sent_ud_list[i].lower():
-			id_conv_table.append(i+1)
-			combine = sent_bert_trim[i]
-			while sent_bert_trim[i]!=sent_ud_list[i].lower():
-				if sent_bert_trim[i+1].startswith('##'):
-					delta = sent_bert_trim[i+1][2:]
-				else:
-					delta = sent_bert_trim[i+1]
-				combine += delta
-				sent_bert_trim[i] = combine
-				id_conv_table.append(i+1)
-				del sent_bert_trim[i+1]
-	id_conv_table.insert(0,'[CLS]')
-	id_conv_table.append('[SEP]')
-	return id_conv_table
+# def get_id_conv_table(sent_ud,sent_bert):
+# 	id_conv_table = []
+# 	sent_ud_list = [s.form for s in sent_ud]
+# 	sent_bert_trim = sent_bert[1:-1]
+# 	for i in range(len(sent_ud_list)):
+# 		if sent_bert_trim[i] == sent_ud_list[i].lower():
+# 			id_conv_table.append(i+1)
+# 		elif sent_bert_trim[i] != sent_ud_list[i].lower():
+# 			id_conv_table.append(i+1)
+# 			combine = sent_bert_trim[i]
+# 			while sent_bert_trim[i]!=sent_ud_list[i].lower():
+# 				if sent_bert_trim[i+1].startswith('##'):
+# 					delta = sent_bert_trim[i+1][2:]
+# 				else:
+# 					delta = sent_bert_trim[i+1]
+# 				combine += delta
+# 				sent_bert_trim[i] = combine
+# 				id_conv_table.append(i+1)
+# 				del sent_bert_trim[i+1]
+# 	id_conv_table.insert(0,'[CLS]')
+# 	id_conv_table.append('[SEP]')
+# 	return id_conv_table
 
 def one_sent_rel_info(layer,head,sent_id,rel):
 	preproc_res_container = preproc_one_sent(sent_id)
 	sent_ud = preproc_res_container['sent_ud']
-	sent_bert = preproc_res_container['sent_bert']
+	# sent_bert = preproc_res_container['sent_bert']
 	candidate_dep_ordid = get_candidate_dep(sent_ud,rel)
 	candidate_head_ordid = get_candidate_head(sent_ud,rel)
 	l_list = []
@@ -370,11 +370,11 @@ def save_one_head_one_sent_wordified_matrix(layer,head,sent_id,write_to_local):
 	return
 
 def debugger(layer,head,sent_id):
-	global deb_sent_ud,deb_sent_raw,deb_sent_bert,deb_bert_matrix,deb_wordified_matrix
+	global deb_sent_ud,deb_sent_raw,deb_bert_matrix,deb_wordified_matrix
 	deb_sent_ud = get_sent_ud(sent_id)
 	deb_sent_raw = get_sent_raw(deb_sent_ud)
-	deb_sent_bert = get_sent_bert(deb_sent_raw)
-	deb_bert_matrix = save_one_head_one_sent_bert_attention_matrix(layer,head,sent_id,1)
+	# deb_sent_bert = get_sent_bert(deb_sent_raw)
+	# deb_bert_matrix = save_one_head_one_sent_bert_attention_matrix(layer,head,sent_id,1)
 	deb_wordified_matrix = save_one_head_one_sent_wordified_matrix(layer,head,sent_id,1)
 	print("bert_matrix, wordified_matrix written to local")
 	print(attention_matrix_wd)
