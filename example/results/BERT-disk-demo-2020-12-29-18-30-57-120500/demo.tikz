@@ -1,0 +1,17 @@
+
+
+\begin{dependency}[hide label, edge unit distance=.5ex]
+  \begin{deptext}[column sep=0.05cm]
+  The\& chef\& that\& went\& to\& the\& stores\& was\& out\& of\& food \\
+\end{deptext}
+\depedge[edge style={red!60!}, edge below]{4}{5}{.}
+\depedge[edge style={red!60!}, edge below]{1}{2}{.}
+\depedge[edge style={red!60!}, edge below]{8}{9}{.}
+\depedge[edge style={red!60!}, edge below]{6}{7}{.}
+\depedge[edge style={red!60!}, edge below]{5}{7}{.}
+\depedge[edge style={red!60!}, edge below]{9}{10}{.}
+\depedge[edge style={red!60!}, edge below]{3}{4}{.}
+\depedge[edge style={red!60!}, edge below]{10}{11}{.}
+\depedge[edge style={red!60!}, edge below]{2}{9}{.}
+\depedge[edge style={red!60!}, edge below]{2}{4}{.}
+\end{dependency}
