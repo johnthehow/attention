@@ -7,7 +7,8 @@ class Probe(nn.Module):
   pass
 
 class TwoWordPSDProbe(Probe):
-  """ Computes squared L2 distance after projection by a matrix.
+  """ Two Word Parsing Distance Probe, 
+  Computes squared L2 distance after projection by a matrix.
 
   For a batch of sentences, computes all n^2 pairs of distances
   for each sentence in the batch.
