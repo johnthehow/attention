@@ -1,0 +1,98 @@
+程序入口run_demo.py
+	导入库
+		导入各种成品库
+		导入各种自定义库
+			导入自定义库中导入的各种成品库
+				run_experiment导入了自定义库和成品库
+			导入自定义库中的各个函数和类
+	if __name__ = "__main__"
+	从pytorch_pretrained_bert导入模型
+	定义自定义变量
+	定义所有函数(但不读取函数体)
+	定义 if __name__ == '__main__':的代码
+		Argument Parser
+			实例化Argument Parser()
+			argument parser中添加参数
+			argparser的参数对象化为对象cli_args
+		定义随机种子
+			定义numpy随机种子
+			定义torch随机种子
+		载入yaml配置
+		调用run_experiment模块的setup_new_experiment_dir函数, 并执行函数体
+			定义实验目录
+				cli_args
+				yaml_args
+				cli_args.results_dir
+			执行run_experiment.setup_new_experiment_dir函数体
+				定义现在时刻
+				定义文件夹名称和路径
+				定义root目录
+		判定计算设备
+			将计算设备判定结果存入yaml_args中
+		调用report_on_stin,将yaml_args汇报在终端中
+			实例化pretrianed_bert_tokenizer
+			实例化pretrained_bert_model
+			调用probe模块TwoWordPSDProbe类
+				调用构造函数
+					作为Probe的子类
+						作为nn.Model的孙类
+					定义Pytorch神经网络部件
+						全零参数矩阵
+						初始化参数
+							均匀分布
+							-0.05~0.05
+						定义计算设备
+				调用probe模块TwoWordPSDProbe函数的实例化对象的load_state_dict函数
+			调用调用probe模块OneWordPSDProbe类
+				调用构造函数
+					作为Probe的子类
+						作为nn.Model的孙类
+					定义Pytorch神经网络部件
+						定义参数矩阵
+							形状
+							参数
+								全零
+								初始化
+									均匀分布
+				调用probe模块OneWordPSDProbe函数的实例化对象的load_state_dict函数
+			处理标准输入(以句为单位进行循环)
+				读取标准输入
+				编号标准输入
+				tokenize标准输入
+				调用data模块match_tokenized_to_untokenized函数
+					功能
+						解决Word-piece分词的词碎裂问题
+					返回值
+						default_dict
+							完整词={词碎片1,词碎片2...}
+				将tokenized句子转化为整数序列
+				将整数序列的segment Embedding全标为1
+				将整数序列转为tensor
+				将segments Embedding转为tensor
+				将整数序列和segements Embedding输入BERT模型走一遭
+					产生各层词表征(24层)
+						每层是 token长度×1024(词向量维度)
+					只要一层表征(根据yaml中的设置, demo是第17层)
+				调用Probe.TwoWordPSDProbe.forward()
+					功能
+						将一层词表征输入structural probe矩阵中走一遭, 得到像空间中的向量们
+						求得像空间中向量们间的距离
+				调用Probe.OneWordPSDProbe.forward()
+					功能
+						将bert输出的原向量映射到像空间
+						求得每个像空间中的向量的长度(范数norm)
+				调用run_demo.print_distance_image()
+					功能
+						可视化像空间中词向量间距离
+						可视化像空间中词向量的深度(长度/范数)
+				
+
+
+
+
+
+
+
+
+
+

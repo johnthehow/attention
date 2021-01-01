@@ -155,7 +155,9 @@ def report_on_stdin(args):
       representation = representation.view(1, *representation.size())
 
       # Run BERT token vectors through the trained probes
+      # 各个像空间中的向量点之间的距离(矩阵, 尺寸: 句子长度×句子长度)
       distance_predictions = distance_probe(representation.to(args['device'])).detach().cpu()[0][:len(untokenized_sent),:len(untokenized_sent)].numpy()
+      # 各个像空间中的向量的范数(向量, 尺寸: 句子长度)
       depth_predictions = depth_probe(representation).detach().cpu()[0][:len(untokenized_sent)].numpy()
 
       # Print results visualizations

@@ -36,13 +36,16 @@ class TwoWordPSDProbe(Probe):
     Returns:
       A tensor of distances of shape (batch_size, max_seq_len, max_seq_len)
     """
+    #transformed是经过structural probe映射后的一句话的词表征
     transformed = torch.matmul(batch, self.proj)
     batchlen, seqlen, rank = transformed.size()
     transformed = transformed.unsqueeze(2)
     transformed = transformed.expand(-1, -1, seqlen, -1)
     transposed = transformed.transpose(1,2)
+    #求得数据矩阵各个向量之间的差向量
     diffs = transformed - transposed
     squared_diffs = diffs.pow(2)
+    #求得数据矩阵的向量间距离
     squared_distances = torch.sum(squared_diffs, -1)
     return squared_distances
 
@@ -75,6 +78,7 @@ class OneWordPSDProbe(Probe):
     """
     transformed = torch.matmul(batch, self.proj)
     batchlen, seqlen, rank = transformed.size()
+    #torch.bmm batch matrix-matrix production 批量矩阵乘法
     norms = torch.bmm(transformed.view(batchlen* seqlen, 1, rank),
         transformed.view(batchlen* seqlen, rank, 1))
     norms = norms.view(batchlen, seqlen)
