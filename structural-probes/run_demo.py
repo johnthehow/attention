@@ -27,7 +27,8 @@ import loss
 import run_experiment
 
 from pytorch_pretrained_bert import BertTokenizer, BertModel
-
+sysstdin = ["mary has a little lamb"]
+sysstdin = (i for i in sysstdin)
 
 def print_tikz(args, prediction_edges, words):
   '''
@@ -120,9 +121,11 @@ def report_on_stdin(args):
 
   # Define the depth probe
   depth_probe = probe.OneWordPSDProbe(args)
+  #载入*.params参数矩阵
   depth_probe.load_state_dict(torch.load(args['probe']['depth_params_path'], map_location=args['device']))
 
-  for index, line in tqdm(enumerate(sys.stdin), desc='[demoing]'):
+
+  for index, line in tqdm(enumerate(sysstdin), desc='[demoing]'):
     # Tokenize the sentence and create tensor inputs to BERT
     untokenized_sent = line.strip().split()
     tokenized_sent = tokenizer.wordpiece_tokenizer.tokenize('[CLS] ' + ' '.join(line.strip().split()) + ' [SEP]')
@@ -131,6 +134,7 @@ def report_on_stdin(args):
     indexed_tokens = tokenizer.convert_tokens_to_ids(tokenized_sent)
     segment_ids = [1 for x in tokenized_sent]
 
+    #把整数序列转化为tensor
     tokens_tensor = torch.tensor([indexed_tokens])
     segments_tensors = torch.tensor([segment_ids])
 
@@ -140,9 +144,14 @@ def report_on_stdin(args):
 
     with torch.no_grad():
       # Run sentence tensor through BERT after averaging subwords for each token
+      # 句子输入bert走一遭, 得到所有24层的词表征
+      # 每层词表征的尺寸是序列长度×1024(bert-large词向量维度)
       encoded_layers, _ = model(tokens_tensor, segments_tensors)
+      # 要24层词表征的哪一层, demo_bert_yaml中要第17层
       single_layer_features = encoded_layers[args['model']['model_layer']]
+      # 一句话在第17层的词表征矩阵(合并word-piece后), 尺寸: 实际句长×1024
       representation = torch.stack([torch.mean(single_layer_features[0,untok_tok_mapping[i][0]:untok_tok_mapping[i][-1]+1,:], dim=0) for i in range(len(untokenized_sent))], dim=0)
+      # 上句代码中的矩阵压平
       representation = representation.view(1, *representation.size())
 
       # Run BERT token vectors through the trained probes
@@ -176,3 +185,4 @@ if __name__ == '__main__':
   device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
   yaml_args['device'] = device
   report_on_stdin(yaml_args)
+ 
